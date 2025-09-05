@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,20 +17,17 @@ namespace Assets.TutorialInfo.Scripts
 
         static void OnSceneLoaded( Scene scene, LoadSceneMode mode )
         {
-            if ( scene.name == "MenuScene" )
-            {
-                GameObject go = new GameObject( "MenuManager" );
-                go.AddComponent<MenuManager>();
-            }
-            else if (scene.name == "LoadingScene")
-            {
-                GameObject go = new GameObject("LoadingManager");
-                go.AddComponent<LoadingScreenManager>();
-            }
-            else if (scene.name == "GameScene")
-            {
-                new GameObject("GameManager").AddComponent<GameManager>();
-            }
+            if (_sceneManagers.TryGetValue(scene.name, out Type managerType))
+                new GameObject(managerType.Name).AddComponent(managerType);
+            else
+                Debug.LogWarning($"No manager mapped for scene: {scene.name}");
         }
+
+        private static Dictionary<string, Type> _sceneManagers = new Dictionary<string, Type>
+        {
+            { "MenuScene", typeof(MenuManager) },
+            { "LoadingScene", typeof(LoadingScreenManager) },
+            { "GameScene", typeof(GameManager) }
+        };  
     }
 }
